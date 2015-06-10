@@ -35,7 +35,7 @@ class Pico_GithubRepos {
       // キャッシュ無効なため、以前作成したファイルを全削除
 	    if($handle = opendir($cdir)){
         while(false !== ($file = readdir($handle))){
-          if($file != "index.md"){
+          if(!is_dir($file) && $file != "index.md"){
             unlink($cdir. "/" . $file);
           }
         }
