@@ -46,11 +46,7 @@ class Pico_GithubRepos {
     try{
       // まずはJSON読み込み
       $content = $this->curl_getcontents($repos_json);
-      if($content){
-        file_put_contents($cachefile, $content);
-      }else{
-        throw new Exception(curl_error($ch));
-      }
+      file_put_contents($cachefile, $content);
       $json = json_decode($content, true);
       foreach($json as $j){
         // readme読み込み？(失敗したらしたで問題なし)
@@ -95,6 +91,9 @@ class Pico_GithubRepos {
     	CURLOPT_USERAGENT => "Pico"));
 
     $content = curl_exec($ch);
+    if(!$content){
+      throw new Exception(curl_error($ch));
+    }
     curl_close($ch);
     return $content;
   }
