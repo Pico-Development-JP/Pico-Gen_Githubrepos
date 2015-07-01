@@ -1,7 +1,7 @@
 <?php
 /**
  * Pico Github Repository List
- * Githubのリポジトリリストをpages配列に追加するプラグイン
+ * Githubのリポジトリリストをpages配列に追加する自動更新モジュール
  *
  * @author TakamiChie
  * @link http://onpu-tamago.net/
@@ -10,37 +10,29 @@
  */
 class Pico_GithubRepos {
 
-  public function config_loaded(&$settings) {
+  public function run($settings) {
+    if(empty($settings['github']['username']) ||
+      empty($settings['github']['directory'])){
+      return;
+    }
     $gUser = $settings['github']['username'];
     $dir = $settings['github']['directory'];
-    $base_url = $settings['base_url'];
     $cdir = ROOT_DIR . $settings["content_dir"] . $dir;
-    $cachedir = CACHE_DIR . "githubrepos/";
+    $cachedir = LOG_DIR . "githubrepos/";
     $cachefile = $cachedir . "repos.json";
     if(!file_exists($cachedir)){
       mkdir($cachedir, "0500", true);
     }
 		$repos_json = sprintf("https://api.github.com/users/%s/repos?sort=updated", $gUser);
 
-    if(file_exists($cachefile)){
-      $filetime = new DateTime();
-      $filetime->setTimestamp(filemtime($cachefile));
-      $filetime->modify("+1 hour");
-      $now = new DateTime();
-      if($filetime > $now){
-        // キャッシュ有効時は、読み取り処理自体が不要なためスキップ
-        return;
-      }
-    }else{
-      // キャッシュ無効なため、以前作成したファイルを全削除
-	    if($handle = opendir($cdir)){
-        while(false !== ($file = readdir($handle))){
-          if(!is_dir($file) && $file != "index.md"){
-            unlink($cdir. "/" . $file);
-          }
+    // 以前作成したファイルを全削除
+    if($handle = opendir($cdir)){
+      while(false !== ($file = readdir($handle))){
+        if(!is_dir($file) && $file != "index.md"){
+          unlink($cdir. "/" . $file);
         }
-        closedir($handle);
-	    }
+      }
+      closedir($handle);
     }
     /* テキストファイル作成処理 */
     try{
