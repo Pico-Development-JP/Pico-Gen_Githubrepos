@@ -43,6 +43,9 @@ class Pico_GithubRepos {
       foreach($json as $j){
         // readme読み込み？(失敗したらしたで問題なし)
         $readme = $this->curl_getcontents("https://raw.githubusercontent.com/" . $j["full_name"] . "/master/README.md");
+        if($readme == "Not Found"){
+          $readme = ""; // Not Foundが帰ってきたら、ファイルはなかったものとみなす
+        }
         // mdファイル作成
         $t = array();
         if($j["fork"]) array_push($t, "fork");
