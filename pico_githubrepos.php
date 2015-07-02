@@ -36,10 +36,14 @@ class Pico_GithubRepos {
     }
     /* テキストファイル作成処理 */
     try{
+      $responce;
       // まずはJSON読み込み
-      $content = $this->curl_getcontents($repos_json);
+      $content = $this->curl_getcontents($repos_json, $responce);
       file_put_contents($cachefile, $content);
       $json = json_decode($content, true);
+      if($responce['http_code'] >= 300){
+        throw new Exception($json["message"]);
+      }
       foreach($json as $j){
         // readme読み込み？(失敗したらしたで問題なし)
         $readme = $this->curl_getcontents("https://raw.githubusercontent.com/" . $j["full_name"] . "/master/README.md");
@@ -74,7 +78,7 @@ class Pico_GithubRepos {
     }
 	}
   
-  private function curl_getcontents($url)
+  private function curl_getcontents($url, &$responce = array())
   {
     $ch = curl_init();
     curl_setopt_array($ch, array(
@@ -86,6 +90,9 @@ class Pico_GithubRepos {
     	CURLOPT_USERAGENT => "Pico"));
 
     $content = curl_exec($ch);
+    if(!curl_errno($ch)) {
+      $responce = curl_getinfo($ch);
+    } 
     if(!$content){
       throw new Exception(curl_error($ch));
     }
