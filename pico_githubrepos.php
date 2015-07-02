@@ -26,14 +26,6 @@ class Pico_GithubRepos {
 		$repos_json = sprintf("https://api.github.com/users/%s/repos?sort=updated", $gUser);
 
     // 以前作成したファイルを全削除
-    if($handle = opendir($cdir)){
-      while(false !== ($file = readdir($handle))){
-        if(!is_dir($file) && $file != "index.md"){
-          unlink($cdir. "/" . $file);
-        }
-      }
-      closedir($handle);
-    }
     /* テキストファイル作成処理 */
     try{
       $responce;
@@ -44,6 +36,7 @@ class Pico_GithubRepos {
       if($responce['http_code'] >= 300){
         throw new Exception($json["message"]);
       }
+      $this->removeBeforeScanned($cdir);
       foreach($json as $j){
         // readme読み込み？(失敗したらしたで問題なし)
         $readme = $this->curl_getcontents("https://raw.githubusercontent.com/" . $j["full_name"] . "/master/README.md");
@@ -68,13 +61,8 @@ class Pico_GithubRepos {
         file_put_contents($cdir . $j["name"] . ".md", $page);
       }
     }catch(Exception $e){
-      $page = "/*\n";
-      $page .= sprintf("  Title: %s\n", "Github Access Error");
-      $page .= sprintf("  Description: %s\n", "Github Access Error");
-      $page .= "*/\n";
-      $page .= "Githubに接続できませんでした。\n";
-      $page .= $e->getMessage();
-      file_put_contents($cdir . "error.md", $page);
+      echo "Github Access Error\n";
+      echo $e->getMessage();
     }
 	}
   
@@ -98,6 +86,17 @@ class Pico_GithubRepos {
     }
     curl_close($ch);
     return $content;
+  }
+  
+  private function removeBeforeScanned($cdir){
+    if($handle = opendir($cdir)){
+      while(false !== ($file = readdir($handle))){
+        if(!is_dir($file) && $file != "index.md"){
+          unlink($cdir. "/" . $file);
+        }
+      }
+      closedir($handle);
+    }
   }
 }
 
