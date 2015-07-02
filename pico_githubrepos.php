@@ -65,7 +65,15 @@ class Pico_GithubRepos {
       echo $e->getMessage();
     }
 	}
-  
+
+  /**
+   *
+   * ファイルをダウンロードする
+   *
+   * @param string $url URL
+   * @param array $responce レスポンスヘッダが格納される配列(参照渡し)。省略可能
+   *
+   */
   private function curl_getcontents($url, &$responce = array())
   {
     $ch = curl_init();
@@ -87,7 +95,14 @@ class Pico_GithubRepos {
     curl_close($ch);
     return $content;
   }
-  
+
+  /**
+   *
+   * 以前自動生成した原稿ファイルを全削除する
+   *
+   * @param string $cdir 対象のファイルが格納されているディレクトリパス
+   *
+   */
   private function removeBeforeScanned($cdir){
     if($handle = opendir($cdir)){
       while(false !== ($file = readdir($handle))){
