@@ -20,6 +20,9 @@ class Pico_GithubRepos {
     $cdir = ROOT_DIR . $settings["content_dir"] . $dir;
     $cachedir = LOG_DIR . "githubrepos/";
     $cachefile = $cachedir . "repos.json";
+    if(!file_exists($cdir)){
+      mkdir($cdir, "0500", true);
+    }
     if(!file_exists($cachedir)){
       mkdir($cachedir, "0500", true);
     }
