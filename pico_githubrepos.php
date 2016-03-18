@@ -17,7 +17,7 @@ class Pico_GithubRepos {
     }
     $gUser = $settings['github']['username'];
     $dir = $settings['github']['directory'];
-    $cdir = ROOT_DIR . $settings["content_dir"] . $dir;
+    $cdir = $settings["content_dir"] . $dir;
     $cachedir = LOG_DIR . "githubrepos/";
     $cachefile = $cachedir . "repos.json";
     if(!file_exists($cdir)){
@@ -51,14 +51,14 @@ class Pico_GithubRepos {
         if($j["fork"]) array_push($t, "fork");
         if($j["has_downloads"]) array_push($t, "downloadable");
         if($j["language"]) array_push($t, $j["language"]);
-        $page = "/*\n";
-        $page .= sprintf("  Title: %s\n", $j["name"]);
-        $page .= sprintf("  Author: %s\n", $j["owner"]["login"]);
-        $page .= sprintf("  Date: %s\n", $j["pushed_at"]);
-        $page .= sprintf("  Description: %s\n", $j["description"]);
-        $page .= sprintf("  URL: %s\n", $j["html_url"]);
-        $page .= sprintf("  Tag: %s\n", implode(", ", $t));
-        $page .= "*/\n";
+        $page = "---\n";
+        $page .= sprintf("Title: %s\n", $j["name"]);
+        $page .= sprintf("Author: %s\n", $j["owner"]["login"]);
+        $page .= sprintf("Date: %s\n", $j["pushed_at"]);
+        $page .= sprintf("Description: %s\n", $j["description"]);
+        $page .= sprintf("URL: %s\n", $j["html_url"]);
+        $page .= sprintf("Tag: %s\n", implode(", ", $t));
+        $page .= "---\n";
         $page .= $readme ? $readme : $j["description"];
 
         file_put_contents($cdir . $j["name"] . ".md", $page);
