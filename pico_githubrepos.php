@@ -19,27 +19,27 @@ class Pico_GithubRepos {
     $dir = $settings['github']['directory'];
     $cdir = $settings["content_dir"] . $dir;
     $cachedir = LOG_DIR . "githubrepos/";
-    $cachefile = $cachedir . "repos.json";
     if(!file_exists($cdir)){
       mkdir($cdir, "0500", true);
     }
     if(!file_exists($cachedir)){
       mkdir($cachedir, "0500", true);
     }
+    $this->removeBeforeScanned($cdir);
 		$repos_json = sprintf("https://api.github.com/users/%s/repos?sort=updated", $gUser);
+    $this->create_reposfile($repos_json, $cdir, $cachedir . "repos.json");
+	}
 
-    // 以前作成したファイルを全削除
-    /* テキストファイル作成処理 */
+  private function create_reposfile(string $url, string $contentdir, string $cachefile){
     try{
       $responce;
       // まずはJSON読み込み
-      $content = $this->curl_getcontents($repos_json, $responce);
+      $content = $this->curl_getcontents($url, $responce);
       file_put_contents($cachefile, $content);
       $json = json_decode($content, true);
       if($responce['http_code'] >= 300){
         throw new Exception($json["message"]);
       }
-      $this->removeBeforeScanned($cdir);
       foreach($json as $j){
         // readme読み込み？(失敗したらしたで問題なし)
         $readme = $this->curl_getcontents("https://raw.githubusercontent.com/" . $j["full_name"] . "/" . $j["default_branch"] . "/README.md");
@@ -61,13 +61,15 @@ class Pico_GithubRepos {
         $page .= "---\n";
         $page .= $readme ? $readme : $j["description"];
 
-        file_put_contents($cdir . $j["name"] . ".md", $page);
+        $fn = $j["name"] . ".md";
+        echo $fn . " Save Success\n";
+        file_put_contents($contentdir . $fn, $page);
       }
     }catch(Exception $e){
       echo "Github Access Error\n";
       echo $e->getMessage();
     }
-	}
+  }
 
   /**
    *
