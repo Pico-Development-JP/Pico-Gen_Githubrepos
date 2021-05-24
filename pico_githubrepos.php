@@ -42,7 +42,7 @@ class Pico_GithubRepos {
       $this->removeBeforeScanned($cdir);
       foreach($json as $j){
         // readme読み込み？(失敗したらしたで問題なし)
-        $readme = $this->curl_getcontents("https://raw.githubusercontent.com/" . $j["full_name"] . "/master/README.md");
+        $readme = $this->curl_getcontents("https://raw.githubusercontent.com/" . $j["full_name"] . "/" . $j["default_branch"] . "/README.md");
         if($readme == "Not Found"){
           $readme = ""; // Not Foundが帰ってきたら、ファイルはなかったものとみなす
         }
