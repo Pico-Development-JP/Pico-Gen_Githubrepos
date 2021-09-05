@@ -17,6 +17,7 @@ class Pico_GithubRepos {
     }
     $gUser = $settings['github']['username'];
     $dir = $settings['github']['directory'];
+    $orgs = $settings['github']['organizations'];
     $cdir = $settings["content_dir"] . $dir;
     $cachedir = LOG_DIR . "githubrepos/";
     if(!file_exists($cdir)){
@@ -26,8 +27,22 @@ class Pico_GithubRepos {
       mkdir($cachedir, "0500", true);
     }
     $this->removeBeforeScanned($cdir);
+    echo ">> Personal Document(s)\n";
 		$repos_json = sprintf("https://api.github.com/users/%s/repos?sort=updated", $gUser);
     $this->create_reposfile($repos_json, $cdir, $cachedir . "repos.json");
+    if($orgs) {
+      echo ">> Organization Document(s)\n";
+      foreach ($orgs as $oneorg) {
+        echo sprintf(">  %s Document(s)\n", $oneorg['name']);
+        $cdir = $settings["content_dir"] . $oneorg['directory'];
+        if(!file_exists($cdir)){
+          mkdir($cdir, "0500", true);
+        }
+        $this->removeBeforeScanned($cdir);
+        $repos_json = sprintf("https://api.github.com/orgs/%s/repos?sort=updated", $oneorg['name']);
+        $this->create_reposfile($repos_json, $cdir, $cachedir . sprintf("%s_repos.json", $oneorg['name']));
+      }
+    }
 	}
 
   private function create_reposfile(string $url, string $contentdir, string $cachefile){
